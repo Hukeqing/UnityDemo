@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace MonumentValley
 {
@@ -7,24 +8,23 @@ namespace MonumentValley
     {
         public float moveSpeed;
         public List<Transform> route;
-        public bool start;
+        [HideInInspector] public bool start;
+        [HideInInspector] public int curTarget;
 
-        private int _curTarget;
-
-        private void Start() => _curTarget = 0;
+        private void Start() => curTarget = 0;
 
         private void Update()
         {
             if (!start) return;
-            if (_curTarget >= route.Count)
+            if (curTarget >= route.Count)
                 return;
             Transform selfTransform;
-            (selfTransform = transform).LookAt(route[_curTarget]);
+            (selfTransform = transform).LookAt(route[curTarget]);
             transform.Translate(moveSpeed * Time.deltaTime * Vector3.forward);
-            if (Vector3.Distance(selfTransform.position, route[_curTarget].position) < 0.1)
-                _curTarget++;
-            if (_curTarget != 2) return;
-            _curTarget = 3;
+            if (Vector3.Distance(selfTransform.position, route[curTarget].position) < 0.1)
+                curTarget++;
+            if (curTarget != 2) return;
+            curTarget = 3;
             transform.position = route[2].position;
         }
     }

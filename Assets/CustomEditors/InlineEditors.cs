@@ -54,7 +54,7 @@ namespace CustomEditors
 
         // 这里会在上方菜单里创建一个按钮
         [MenuItem("MyMenu/Create GameObject")]
-        private void Test()
+        private static void Test()
         {
             Debug.Log("Hit it!");
         }
