@@ -10,7 +10,8 @@ namespace MonumentValley.Editor
         private SerializedProperty _moveSpeed;
         private SerializedProperty _route;
         private string _str = "start";
-
+        private float _show = 0;
+        
         private void OnEnable()
         {
             _moveSpeed = serializedObject.FindProperty("moveSpeed");
@@ -20,21 +21,33 @@ namespace MonumentValley.Editor
         public override void OnInspectorGUI()
         {
 //            serializedObject.Update();
-            DrawDefaultInspector();
-            GUILayout.BeginHorizontal();
-            if (GUILayout.Button(_str))
+//            DrawDefaultInspector();
+            EditorGUILayout.PropertyField(_moveSpeed);
+            EditorGUILayout.PropertyField(_route);
+            EditorGUI.indentLevel = 1;
+            foreach (var variable in _route)
             {
-                ((Player) target).start = !((Player) target).start;
-                _str = ((Player) target).start ? "stop" : "start";
+                EditorGUILayout.PropertyField((SerializedProperty) variable);
             }
+            serializedObject.ApplyModifiedProperties();
 
-            if (GUILayout.Button("Back"))
+            
+            if (EditorGUILayout.BeginFadeGroup(1f))
             {
-                ((Player) target).transform.position = new Vector3(0, 14, -6);
-                ((Player) target).curTarget = 0;
-            }
+                GUILayout.BeginHorizontal();
+                if (GUILayout.Button(_str))
+                {
+                    ((Player) target).start = !((Player) target).start;
+                    _str = ((Player) target).start ? "stop" : "start";
+                }
 
-            GUILayout.EndHorizontal();
+                if (GUILayout.Button("Back"))
+                {
+                    ((Player) target).transform.position = new Vector3(0, 14, -6);
+                    ((Player) target).curTarget = 0;
+                }
+                GUILayout.EndHorizontal();
+            }
         }
     }
 }

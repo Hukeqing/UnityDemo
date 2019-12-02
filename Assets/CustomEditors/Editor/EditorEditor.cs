@@ -21,6 +21,7 @@ namespace CustomEditors.Editor
             EditorGUILayout.PropertyField(_target);
             var t = target as EditorScene;
             Debug.Assert(t != null, nameof(t) + " != null");
+            GUILayout.BeginHorizontal();
             if (GUILayout.Button("change"))
             {
                 t.isLook = !t.isLook;
@@ -32,6 +33,7 @@ namespace CustomEditors.Editor
                 t.target = new Vector3(Random.Range(-10, 10), Random.Range(-10, 10), Random.Range(-10, 10));
                 t.Update();
             }
+            GUILayout.EndHorizontal();
         }
 
         public void OnSceneGUI()

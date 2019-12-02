@@ -11,7 +11,6 @@ namespace CustomEditors.Editor
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
             EditorGUI.BeginProperty(position, label, property);
-            //每个实例的名字 本来应该是Element0123 ，但这里显示了Name字符串
             position = EditorGUI.PrefixLabel(position, label);
 
             //本来是1层，要缩进，设置成0和他的上级size同级，使之与其对齐；

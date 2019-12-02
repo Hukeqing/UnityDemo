@@ -7,7 +7,7 @@ namespace MonumentValley
     public class Player : MonoBehaviour
     {
         public float moveSpeed;
-        public List<Transform> route;
+        public Transform[] route;
         [HideInInspector] public bool start;
         [HideInInspector] public int curTarget;
 
@@ -16,7 +16,7 @@ namespace MonumentValley
         private void Update()
         {
             if (!start) return;
-            if (curTarget >= route.Count)
+            if (curTarget >= route.Length)
                 return;
             Transform selfTransform;
             (selfTransform = transform).LookAt(route[curTarget]);

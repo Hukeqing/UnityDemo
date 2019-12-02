@@ -468,13 +468,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cb87eb243f88bef4fbcad236c09c68b4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveSpeed: 5
+  moveSpeed: 5.06
   route:
   - {fileID: 2086111001}
   - {fileID: 614313492}
   - {fileID: 2083032543}
   - {fileID: 242718415}
   start: 0
+  curTarget: 0
 --- !u!1 &1390011989
 GameObject:
   m_ObjectHideFlags: 0
