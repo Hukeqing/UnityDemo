@@ -10,7 +10,6 @@ namespace MonumentValley.Editor
         private SerializedProperty _moveSpeed;
         private SerializedProperty _route;
         private string _str = "start";
-        private float _show = 0;
         
         private void OnEnable()
         {
