@@ -27,15 +27,22 @@ namespace DIYMesh
         private MeshCollider _meshCollider;
 
         [Range(0.05f, 1f)] public float drawCoolDown = 0.1f;
+        [Range(0.05f, 2f)] public float drawWeight = 0.1f;
 
         private List<Vector3> _vector3S;
         private bool _drawStatus;
         private float _nextDraw;
+        private Camera _camera;
+        private bool _isCameraNull;
+        private MeshRenderer _meshRenderer;
 
         private void Start()
         {
+            _camera = Camera.main;
+            _isCameraNull = _camera == null;
             _shader = Shader.Find("Standard");
             _mesh = new Mesh();
+            _mesh.Clear();
             _material = new Material(_shader);
 
             if (!GetComponent<MeshFilter>())
@@ -50,7 +57,7 @@ namespace DIYMesh
                 gameObject.AddComponent<MeshRenderer>();
             }
 
-            GetComponent<MeshRenderer>().material = _material;
+            (_meshRenderer = GetComponent<MeshRenderer>()).material = _material;
 
             if (!GetComponent<MeshCollider>())
             {
@@ -67,19 +74,17 @@ namespace DIYMesh
 
         private void Update()
         {
-            Ray ray;
-            RaycastHit hitInfo;
             if (Input.GetMouseButton(0) && !_drawStatus && _nextDraw <= Time.time)
             {
                 _nextDraw = Time.time + drawCoolDown;
-                if (Camera.main == null) return;
-                ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-                if (!Physics.Raycast(ray, out hitInfo, 1000)) return;
+                if (_isCameraNull) return;
+                var ray = _camera.ScreenPointToRay(Input.mousePosition);
+                if (!Physics.Raycast(ray, out var hitInfo, 1000)) return;
                 if (_vector3S.Count > 0 && Vector3.Distance(_vector3S[_vector3S.Count - 1],
                         new Vector3(hitInfo.point.x, hitInfo.point.y, 0)) < 0.2) return;
                 _vector3S.Add(new Vector3(hitInfo.point.x, hitInfo.point.y, 0));
-                if (_vector3S.Count >= 3)
-                    SetVertices(_vector3S, 0.1f);
+//                if (_vector3S.Count >= 3)
+                SetVertices(_vector3S, drawWeight);
             }
 
             if (Input.GetMouseButtonUp(0))
@@ -88,14 +93,26 @@ namespace DIYMesh
             }
         }
 
+        // ReSharper disable once MemberCanBePrivate.Global
         public void SetColor(Color color, RenderingMode renderingMode = RenderingMode.Opaque)
         {
             _material.color = color;
             SetMaterialRenderingMode(_material, renderingMode);
         }
 
+        // ReSharper disable once MemberCanBePrivate.Global
         public void SetVertices(List<Vector3> verticesList, float weight = 1f)
         {
+            if (verticesList.Count < 3)
+            {
+                _meshRenderer.enabled = false;
+                _meshCollider.enabled = false;
+                return;
+            }
+
+            _meshRenderer.enabled = true;
+            _meshCollider.enabled = true;
+
             _vertices = new Vector3[verticesList.Count * 2];
             _indices = new int[verticesList.Count * 24];
             for (var i = 0; i < verticesList.Count; i++)
@@ -143,6 +160,13 @@ namespace DIYMesh
             _meshCollider.sharedMesh = _mesh;
         }
 
+        public void Clear()
+        {
+            _drawStatus = false;
+            _vector3S.Clear();
+            _mesh.Clear();
+        }
+
         //设置材质的渲染模式
         private static void SetMaterialRenderingMode(Material material, RenderingMode renderingMode)
         {
@@ -184,6 +208,8 @@ namespace DIYMesh
                     material.EnableKeyword("_ALPHAPREMULTIPLY_ON");
                     material.renderQueue = 3000;
                     break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(renderingMode), renderingMode, null);
             }
         }
     }

@@ -468,7 +468,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cb87eb243f88bef4fbcad236c09c68b4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveSpeed: 5.06
+  moveSpeed: 5
   route:
   - {fileID: 2086111001}
   - {fileID: 614313492}
@@ -675,10 +675,6 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 100038, guid: aa6ca39d123f30548a45ae1aeec94ccd, type: 3}
-      propertyPath: m_Name
-      value: Monument
-      objectReference: {fileID: 0}
     - target: {fileID: 100000, guid: aa6ca39d123f30548a45ae1aeec94ccd, type: 3}
       propertyPath: m_TagString
       value: Untagged
@@ -686,6 +682,10 @@ PrefabInstance:
     - target: {fileID: 100002, guid: aa6ca39d123f30548a45ae1aeec94ccd, type: 3}
       propertyPath: m_Name
       value: Cube.000
+      objectReference: {fileID: 0}
+    - target: {fileID: 100038, guid: aa6ca39d123f30548a45ae1aeec94ccd, type: 3}
+      propertyPath: m_Name
+      value: Monument
       objectReference: {fileID: 0}
     - target: {fileID: 400000, guid: aa6ca39d123f30548a45ae1aeec94ccd, type: 3}
       propertyPath: m_LocalRotation.x
