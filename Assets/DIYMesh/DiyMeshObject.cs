@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace DIYMesh
 {
@@ -12,6 +13,12 @@ namespace DIYMesh
         Transparent
     }
 
+    public enum MeshMode
+    {
+        Mode,
+        Object
+    }
+    
     public class DiyMeshObject : MonoBehaviour
     {
         private static readonly int SrcBlend = Shader.PropertyToID("_SrcBlend");
@@ -36,6 +43,8 @@ namespace DIYMesh
         private bool _isCameraNull;
         private MeshRenderer _meshRenderer;
 
+
+        public MeshMode mode = MeshMode.Mode;
         private void Start()
         {
             _camera = Camera.main;
@@ -74,6 +83,7 @@ namespace DIYMesh
 
         private void Update()
         {
+            if (mode == MeshMode.Object) return;
             if (Input.GetMouseButton(0) && !_drawStatus && _nextDraw <= Time.time)
             {
                 _nextDraw = Time.time + drawCoolDown;
