@@ -28,7 +28,6 @@ namespace CustomEditors.Editor
             EditorGUI.PropertyField(nameRect, property.FindPropertyRelative("name"), GUIContent.none);
 
             EditorGUI.indentLevel = 1;
-
             //重新设置为原来的层级
             EditorGUI.indentLevel = index;
 

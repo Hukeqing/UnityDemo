@@ -11,7 +11,7 @@ namespace DIYMesh.Editor
         private SerializedProperty _drawWeight;
         private SerializedProperty _mode;
         
-        private Color _color = Color.red;
+        private Color _color = Color.white;
         
         public void OnEnable()
         {
