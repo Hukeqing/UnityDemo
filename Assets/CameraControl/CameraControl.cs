@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Numerics;
 using UnityEngine;
-using UnityEngine.Serialization;
-using Vector3 = UnityEngine.Vector3;
 
 namespace CameraControl
 {
@@ -22,6 +19,10 @@ namespace CameraControl
 
         public Transform player;
         public float moveSpeed;
+        public Vector2 mouseRect;
+        public Vector2 screenVector2;
+        
+        private float _curMoveSpeed;
 
         private Vector3 _prePosition;
         private float _preAngle;
@@ -70,9 +71,25 @@ namespace CameraControl
 
         private void Mou()
         {
-            
+            var mouseAllowRect = new Rect(mouseRect.x, mouseRect.y, Screen.width - 2 * mouseRect.x,
+                Screen.height - 2 * mouseRect.y);
+            screenVector2 = new Vector2(Screen.width, Screen.height);
+            var moveVector3 =
+                new Vector3(
+                    Input.mousePosition.x < mouseAllowRect.xMin ? -1 :
+                    Input.mousePosition.x > mouseAllowRect.xMax ? 1 : 0,
+                    Input.mousePosition.y < mouseAllowRect.yMin ? -1 :
+                    Input.mousePosition.y > mouseAllowRect.yMax ? 1 : 0,
+                    0);
+//            moveVector3.Normalize();
+//            Debug.Log(moveVector3);
+//            Debug.Log(Input.mousePosition);
+            _curMoveSpeed = Math.Abs(moveVector3.sqrMagnitude) > Mathf.Epsilon
+                ? NextValue(_curMoveSpeed, moveSpeed)
+                : NextValue(_curMoveSpeed, 0);
+            transform.Translate(Time.deltaTime * _curMoveSpeed * moveVector3);
         }
-        
+
         private float NextValue(float curValue, float targetValue)
         {
             return !enableLinearInterpolation ? targetValue : Mathf.Lerp(curValue, targetValue, linearInterpolation);
