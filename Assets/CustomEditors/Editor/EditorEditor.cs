@@ -56,7 +56,6 @@ namespace CustomEditors.Editor
             Handles.color = new Color(1, 1, 1, 0.2f);
             Handles.DrawSolidArc(position, up, forward, 20, 10);
             Handles.DrawSolidArc(position, up, forward, -20, 10);
-//            Handles.DrawWireArc(position, up,forward, 360, 10);
         }
     }
 }

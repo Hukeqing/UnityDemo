@@ -1,5 +1,6 @@
 ﻿using System;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace CameraControl
 {
@@ -18,15 +19,22 @@ namespace CameraControl
         [Range(0, 1)] public float linearInterpolation;
 
         public Transform player;
-        public float moveSpeed;
-        public Vector2 mouseRect;
-        public Vector2 screenVector2;
-        
-        private float _curMoveSpeed;
 
         private Vector3 _prePosition;
         private float _preAngle;
         private Vector3 _preNormal;
+
+        public float moveSpeed;
+        public Vector2 mouseRect;
+        public bool useClock;
+        public Vector3 clockPosition2, clockPosition1;
+
+
+        public int freeDimension;
+        // TODO...
+        public float cameraDistance;
+
+        private float _curMoveSpeed;
 
         private void Start()
         {
@@ -73,7 +81,6 @@ namespace CameraControl
         {
             var mouseAllowRect = new Rect(mouseRect.x, mouseRect.y, Screen.width - 2 * mouseRect.x,
                 Screen.height - 2 * mouseRect.y);
-            screenVector2 = new Vector2(Screen.width, Screen.height);
             var moveVector3 =
                 new Vector3(
                     Input.mousePosition.x < mouseAllowRect.xMin ? -1 :
@@ -81,13 +88,15 @@ namespace CameraControl
                     Input.mousePosition.y < mouseAllowRect.yMin ? -1 :
                     Input.mousePosition.y > mouseAllowRect.yMax ? 1 : 0,
                     0);
-//            moveVector3.Normalize();
-//            Debug.Log(moveVector3);
-//            Debug.Log(Input.mousePosition);
+            moveVector3.Normalize();
             _curMoveSpeed = Math.Abs(moveVector3.sqrMagnitude) > Mathf.Epsilon
                 ? NextValue(_curMoveSpeed, moveSpeed)
                 : NextValue(_curMoveSpeed, 0);
             transform.Translate(Time.deltaTime * _curMoveSpeed * moveVector3);
+            if (useClock)
+            {
+                PositionClock();
+            }
         }
 
         private float NextValue(float curValue, float targetValue)
@@ -114,6 +123,27 @@ namespace CameraControl
             {
                 angle = NextValue(0, angle);
             }
+        }
+
+        private void PositionClock()
+        {
+            var position = transform.position;
+            var newPosition = new Vector3
+            {
+                x = freeDimension == 1
+                    ? position.x
+                    : Mathf.Clamp(position.x, Mathf.Min(clockPosition1.x, clockPosition2.x),
+                        Mathf.Max(clockPosition1.x, clockPosition2.x)),
+                y = freeDimension == 2
+                    ? position.y
+                    : Mathf.Clamp(position.y, Mathf.Min(clockPosition1.y, clockPosition2.y),
+                        Mathf.Max(clockPosition1.y, clockPosition2.y)),
+                z = freeDimension == 3
+                    ? position.z
+                    : Mathf.Clamp(position.z, Mathf.Min(clockPosition1.z, clockPosition2.z),
+                        Mathf.Max(clockPosition1.z, clockPosition2.z))
+            };
+            transform.position = newPosition;
         }
     }
 }

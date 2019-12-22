@@ -14,17 +14,20 @@ namespace CameraControl.Editor
         private SerializedProperty _cameraMode;
         private float _linearInterpolationValue;
 
-        private SerializedProperty _mouseRect;
         private SerializedProperty _moveSpeed;
 
         private Object _player;
+
+        private bool _clockSceneShow = true;
+        private Color _clockColor = Color.red;
 
         private void OnEnable()
         {
             _this = target as CameraControl;
             _cameraMode = serializedObject.FindProperty("cameraMode");
-            _mouseRect = serializedObject.FindProperty("mouseRect");
             _moveSpeed = serializedObject.FindProperty("moveSpeed");
+            // _this.maxMovePosition = new Vector3(10, 10, 10);
+            // _this.minMovePosition = new Vector3(-10, -10, -10);
         }
 
         public override void OnInspectorGUI()
@@ -65,6 +68,70 @@ namespace CameraControl.Editor
                             MessageType.Warning);
                     EditorGUILayout.PropertyField(_moveSpeed);
                     serializedObject.ApplyModifiedProperties();
+                    _this.useClock = EditorGUILayout.Foldout(_this.useClock,
+                        _this.useClock ? "Enabled Clock" : "Disabled Clock");
+                    if (_this.useClock)
+                    {
+                        _clockSceneShow = EditorGUILayout.Foldout(_clockSceneShow,
+                            _clockSceneShow ? "Enabled Scene Rect" : "Disabled Scene Rect");
+                        if (_clockSceneShow)
+                        {
+                            _clockColor = EditorGUILayout.ColorField("Scene Show Color: ", _clockColor);
+                        }
+
+                        _this.freeDimension = EditorGUILayout.Popup("Not Clock Dimension", _this.freeDimension,
+                            new string[] {"None", "x", "y", "z"});
+                        EditorGUILayout.BeginVertical();
+                        if (_this.freeDimension != 1)
+                        {
+                            EditorGUILayout.LabelField("x: ");
+                            EditorGUILayout.BeginHorizontal();
+                            EditorGUILayout.LabelField("Range from: ", GUILayout.Width(80));
+                            _this.clockPosition1.x = EditorGUILayout.FloatField(_this.clockPosition1.x);
+                            EditorGUILayout.LabelField(" to: ", GUILayout.Width(30));
+                            _this.clockPosition2.x = EditorGUILayout.FloatField(_this.clockPosition2.x);
+                            EditorGUILayout.EndHorizontal();
+                        }
+                        else
+                        {
+                            _this.clockPosition1.x = 0;
+                            _this.clockPosition2.x = 0;
+                        }
+
+                        if (_this.freeDimension != 2)
+                        {
+                            EditorGUILayout.LabelField("y: ");
+                            EditorGUILayout.BeginHorizontal();
+                            EditorGUILayout.LabelField("Range from: ", GUILayout.Width(80));
+                            _this.clockPosition1.y = EditorGUILayout.FloatField(_this.clockPosition1.y);
+                            EditorGUILayout.LabelField(" to: ", GUILayout.Width(30));
+                            _this.clockPosition2.y = EditorGUILayout.FloatField(_this.clockPosition2.y);
+                            EditorGUILayout.EndHorizontal();
+                        }
+                        else
+                        {
+                            _this.clockPosition1.y = 0;
+                            _this.clockPosition2.y = 0;
+                        }
+
+                        if (_this.freeDimension != 3)
+                        {
+                            EditorGUILayout.LabelField("z: ");
+                            EditorGUILayout.BeginHorizontal();
+                            EditorGUILayout.LabelField("Range from: ", GUILayout.Width(80));
+                            _this.clockPosition1.z = EditorGUILayout.FloatField(_this.clockPosition1.z);
+                            EditorGUILayout.LabelField(" to: ", GUILayout.Width(30));
+                            _this.clockPosition2.z = EditorGUILayout.FloatField(_this.clockPosition2.z);
+                            EditorGUILayout.EndHorizontal();
+                        }
+                        else
+                        {
+                            _this.clockPosition1.z = 0;
+                            _this.clockPosition2.z = 0;
+                        }
+
+                        EditorGUILayout.EndVertical();
+                    }
                     break;
                 case 3:
                     break;
@@ -73,7 +140,12 @@ namespace CameraControl.Editor
 
         private void OnSceneGUI()
         {
-//            Handles.color = new Color(0.8f, 0.8f, 0.8f, 0.3f);
+            if (!_this.useClock || !_clockSceneShow || _this.cameraMode != CameraMode.MouseControl) return;
+            Handles.color = _clockColor;
+            _this.clockPosition2 = Handles.PositionHandle(_this.clockPosition2, Quaternion.identity);
+            _this.clockPosition1 = Handles.PositionHandle(_this.clockPosition1, Quaternion.identity);
+            Handles.DrawWireCube((_this.clockPosition2 + _this.clockPosition1) / 2,
+                _this.clockPosition2 - _this.clockPosition1);
         }
     }
 }
