@@ -15,6 +15,7 @@ namespace CameraControl.Editor
         private float _linearInterpolationValue;
 
         private SerializedProperty _moveSpeed;
+        private SerializedProperty _zoomInSpeed;
 
         private Object _player;
 
@@ -26,6 +27,7 @@ namespace CameraControl.Editor
             _this = target as CameraControl;
             _cameraMode = serializedObject.FindProperty("cameraMode");
             _moveSpeed = serializedObject.FindProperty("moveSpeed");
+            _zoomInSpeed = serializedObject.FindProperty("zoomInSpeed");
             // _this.maxMovePosition = new Vector3(10, 10, 10);
             // _this.minMovePosition = new Vector3(-10, -10, -10);
         }
@@ -67,6 +69,7 @@ namespace CameraControl.Editor
                             "This is not a good value for some PC\nPlease set the value greater than 5px",
                             MessageType.Warning);
                     EditorGUILayout.PropertyField(_moveSpeed);
+                    EditorGUILayout.PropertyField(_zoomInSpeed);
                     serializedObject.ApplyModifiedProperties();
                     _this.useClock = EditorGUILayout.Foldout(_this.useClock,
                         _this.useClock ? "Enabled Clock" : "Disabled Clock");

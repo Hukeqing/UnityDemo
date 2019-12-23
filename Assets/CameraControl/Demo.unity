@@ -304,11 +304,11 @@ MonoBehaviour:
   player: {fileID: 1028819678}
   moveSpeed: 10
   mouseRect: {x: 10, y: 10}
-  useClock: 1
+  zoomInSpeed: 2
+  useClock: 0
   clockPosition2: {x: -21.6, y: 11.232916, z: 8.090204}
   clockPosition1: {x: 26.916172, y: -3.360797, z: -34.670067}
   freeDimension: 0
-  cameraDistance: 0
 --- !u!1 &1323370912
 GameObject:
   m_ObjectHideFlags: 0

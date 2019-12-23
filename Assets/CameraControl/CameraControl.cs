@@ -14,6 +14,8 @@ namespace CameraControl
 
     public class CameraControl : MonoBehaviour
     {
+        private Camera _camera;
+
         public CameraMode cameraMode;
         public bool enableLinearInterpolation;
         [Range(0, 1)] public float linearInterpolation;
@@ -26,18 +28,20 @@ namespace CameraControl
 
         public float moveSpeed;
         public Vector2 mouseRect;
+        public float zoomInSpeed;
         public bool useClock;
         public Vector3 clockPosition2, clockPosition1;
 
 
         public int freeDimension;
-        // TODO...
-        public float cameraDistance;
+        // TODO move up and down with plane
+        // public float cameraDistance;
 
         private float _curMoveSpeed;
 
         private void Start()
         {
+            _camera = GetComponent<Camera>();
             var thisTransform = transform;
             _prePosition = player.position - thisTransform.position;
             RotationAngle(player, thisTransform, out _preAngle, out _preNormal);
@@ -65,6 +69,7 @@ namespace CameraControl
 
         private void Sync()
         {
+            if (!player) return;
             Transform thisTransform;
             (thisTransform = transform).position = NextPosition(transform.position, player.position - _prePosition);
             RotationAngle(thisTransform, player, out var angle, out var normal);
@@ -74,6 +79,7 @@ namespace CameraControl
 
         private void Fol()
         {
+            if (!player) return;
             transform.position = NextPosition(transform.position, player.position - _prePosition);
         }
 
@@ -97,6 +103,9 @@ namespace CameraControl
             {
                 PositionClock();
             }
+
+            _camera.orthographicSize -= zoomInSpeed * Input.mouseScrollDelta.y;
+            _camera.fieldOfView -= zoomInSpeed * Input.mouseScrollDelta.y;
         }
 
         private float NextValue(float curValue, float targetValue)
