@@ -72,3 +72,6 @@ crashlytics-build.properties
 # Rider
 .idea/
 .idea/*
+
+# This
+*/taecgLibrary*

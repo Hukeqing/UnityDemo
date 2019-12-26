@@ -3,7 +3,6 @@
     Properties
     {
         _Color ("Main", Color) = (1, 1, 1, 1)
-        _Slider ("Slider", Range(0, 1000)) = 200
     }
     SubShader
     {
@@ -22,7 +21,6 @@
             #pragma fragment frag
             
             fixed4 _Color;
-            fixed _Slider;
             struct appdata
             {
                 float4 vertex : POSITION;   
@@ -52,9 +50,7 @@
             
             fixed4 frag (v2f i) : SV_TARGET
             {
-                if (i.pos.y > _Slider)
-                    return checker(i.uv);
-                return fixed4(0, 0, 0, 0);
+                return checker(i.uv);
             }
             
             ENDCG
