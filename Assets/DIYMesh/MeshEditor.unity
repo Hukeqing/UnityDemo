@@ -307,8 +307,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   drawCoolDown: 0.05
-  drawWeight: 0.05
+  drawForwardWeight: 0.35
+  drawBehindWeight: 0.20000005
   mode: 0
+  threeDimensional: 1
 --- !u!1 &2107141180
 GameObject:
   m_ObjectHideFlags: 0

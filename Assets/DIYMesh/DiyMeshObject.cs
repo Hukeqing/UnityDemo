@@ -18,7 +18,7 @@ namespace DIYMesh
         Mode,
         Object
     }
-    
+
     public class DiyMeshObject : MonoBehaviour
     {
         private static readonly int SrcBlend = Shader.PropertyToID("_SrcBlend");
@@ -33,8 +33,11 @@ namespace DIYMesh
         private Material _material;
         private MeshCollider _meshCollider;
 
-        [Range(0.05f, 1f)] public float drawCoolDown = 0.1f;
-        [Range(0.05f, 2f)] public float drawWeight = 0.1f;
+        public bool threeDimensional = true;
+        public MeshMode mode = MeshMode.Mode;
+        public float drawCoolDown = 0.05f;
+        public float drawForwardWeight = -0.1f;
+        public float drawBehindWeight = 0.1f;
 
         private List<Vector3> _vector3S;
         private bool _drawStatus;
@@ -43,8 +46,6 @@ namespace DIYMesh
         private bool _isCameraNull;
         private MeshRenderer _meshRenderer;
 
-
-        public MeshMode mode = MeshMode.Mode;
         private void Start()
         {
             _camera = Camera.main;
@@ -93,8 +94,7 @@ namespace DIYMesh
                 if (_vector3S.Count > 0 && Vector3.Distance(_vector3S[_vector3S.Count - 1],
                         new Vector3(hitInfo.point.x, hitInfo.point.y, 0)) < 0.2) return;
                 _vector3S.Add(new Vector3(hitInfo.point.x, hitInfo.point.y, 0));
-//                if (_vector3S.Count >= 3)
-                SetVertices(_vector3S, drawWeight);
+                SetVertices(_vector3S, drawForwardWeight, drawBehindWeight);
             }
 
             if (Input.GetMouseButtonUp(0))
@@ -111,7 +111,7 @@ namespace DIYMesh
         }
 
         // ReSharper disable once MemberCanBePrivate.Global
-        public void SetVertices(List<Vector3> verticesList, float weight = 1f)
+        public void SetVertices(List<Vector3> verticesList, float forwardWeight = 0.5f, float behindWeight = 0.5f)
         {
             if (verticesList.Count < 3)
             {
@@ -122,47 +122,73 @@ namespace DIYMesh
 
             _meshRenderer.enabled = true;
             _meshCollider.enabled = true;
+            //  vertices:     0 - n-1        forward
+            //                n - 2n-1       behind 
+            // indices:       0 - 6*(n-2)                forward face
+            //                6*(n-2) - 12*(n-2)         behind face
+            //                12*(n-2) - 24*(n-2)        weight face
+            if (threeDimensional)
+            {
+                _vertices = new Vector3[verticesList.Count * 2];
+                _indices = new int[verticesList.Count * 24];
+            }
+            else
+            {
+                _vertices = new Vector3[verticesList.Count];
+                _indices = new int[verticesList.Count * 6];
+            }
 
-            _vertices = new Vector3[verticesList.Count * 2];
-            _indices = new int[verticesList.Count * 24];
             for (var i = 0; i < verticesList.Count; i++)
             {
                 _vertices[i] = verticesList[i];
-                _vertices[i].z -= weight / 2;
+                _vertices[i].z += forwardWeight;
+                if (!threeDimensional) continue;
                 _vertices[i + verticesList.Count] = verticesList[i];
-                _vertices[i + verticesList.Count].z += weight / 2;
-
-                var nearby = i == verticesList.Count - 1 ? 0 : i + 1;
-                _indices[i * 12 + 00] = i;
-                _indices[i * 12 + 01] = nearby;
-                _indices[i * 12 + 02] = i + verticesList.Count;
-                _indices[i * 12 + 03] = nearby;
-                _indices[i * 12 + 04] = nearby + verticesList.Count;
-                _indices[i * 12 + 05] = i + verticesList.Count;
-
-                _indices[i * 12 + 06] = i;
-                _indices[i * 12 + 07] = i + verticesList.Count;
-                _indices[i * 12 + 08] = nearby;
-                _indices[i * 12 + 09] = nearby;
-                _indices[i * 12 + 10] = i + verticesList.Count;
-                _indices[i * 12 + 11] = nearby + verticesList.Count;
+                _vertices[i + verticesList.Count].z += behindWeight;
             }
 
             for (var i = 0; i < verticesList.Count - 2; i++)
             {
-                _indices[verticesList.Count * 12 + i * 12 + 00] = i;
-                _indices[verticesList.Count * 12 + i * 12 + 01] = i + 1;
-                _indices[verticesList.Count * 12 + i * 12 + 02] = verticesList.Count - 1;
-                _indices[verticesList.Count * 12 + i * 12 + 03] = i;
-                _indices[verticesList.Count * 12 + i * 12 + 04] = verticesList.Count - 1;
-                _indices[verticesList.Count * 12 + i * 12 + 05] = i + 1;
+                _indices[i * 6 + 0] = 0;
+                _indices[i * 6 + 1] = i + 1;
+                _indices[i * 6 + 2] = i + 2;
+                _indices[i * 6 + 3] = 0;
+                _indices[i * 6 + 4] = i + 2;
+                _indices[i * 6 + 5] = i + 1;
+            }
 
-                _indices[verticesList.Count * 12 + i * 12 + 06] = i + verticesList.Count;
-                _indices[verticesList.Count * 12 + i * 12 + 07] = verticesList.Count + i + 1;
-                _indices[verticesList.Count * 12 + i * 12 + 08] = verticesList.Count + verticesList.Count - 1;
-                _indices[verticesList.Count * 12 + i * 12 + 09] = i + verticesList.Count;
-                _indices[verticesList.Count * 12 + i * 12 + 10] = verticesList.Count + verticesList.Count - 1;
-                _indices[verticesList.Count * 12 + i * 12 + 11] = verticesList.Count + i + 1;
+            if (threeDimensional)
+            {
+                var beginOfIndices = 6 * (verticesList.Count - 2);
+                var behindVertices = verticesList.Count;
+                for (var i = 0; i < verticesList.Count - 2; i++)
+                {
+                    _indices[beginOfIndices + i * 6 + 0] = behindVertices;
+                    _indices[beginOfIndices + i * 6 + 1] = behindVertices + i + 1;
+                    _indices[beginOfIndices + i * 6 + 2] = behindVertices + i + 2;
+                    _indices[beginOfIndices + i * 6 + 3] = behindVertices;
+                    _indices[beginOfIndices + i * 6 + 4] = behindVertices + i + 2;
+                    _indices[beginOfIndices + i * 6 + 5] = behindVertices + i + 1;
+                }
+
+                beginOfIndices *= 2;
+                for (var i = 0; i < verticesList.Count; i++)
+                {
+                    var j = i == 0 ? verticesList.Count - 1 : i - 1;
+                    _indices[beginOfIndices + i * 12 + 00] = i;
+                    _indices[beginOfIndices + i * 12 + 01] = j;
+                    _indices[beginOfIndices + i * 12 + 02] = i + behindVertices;
+                    _indices[beginOfIndices + i * 12 + 03] = i;
+                    _indices[beginOfIndices + i * 12 + 04] = i + behindVertices;
+                    _indices[beginOfIndices + i * 12 + 05] = j;
+
+                    _indices[beginOfIndices + i * 12 + 06] = j;
+                    _indices[beginOfIndices + i * 12 + 07] = j + behindVertices;
+                    _indices[beginOfIndices + i * 12 + 08] = i + behindVertices;
+                    _indices[beginOfIndices + i * 12 + 09] = j;
+                    _indices[beginOfIndices + i * 12 + 10] = i + behindVertices;
+                    _indices[beginOfIndices + i * 12 + 11] = j + behindVertices;
+                }
             }
 
             _mesh.vertices = _vertices;
