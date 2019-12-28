@@ -306,11 +306,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7cc89855e033d8e4ca82516ae7760b4a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  drawCoolDown: 0.05
-  drawForwardWeight: 0.35
-  drawBehindWeight: 0.20000005
-  mode: 0
   threeDimensional: 1
+  mode: 0
+  drawCoolDown: 0.05
+  drawForwardWeight: 0.86887854
+  drawBehindWeight: -0.8411215
 --- !u!1 &2107141180
 GameObject:
   m_ObjectHideFlags: 0
