@@ -12,6 +12,7 @@ namespace CameraControl.Editor
         private CameraControl _this;
 
         private SerializedProperty _cameraMode;
+        private SerializedProperty _grayScaleAmount;
         private float _linearInterpolationValue;
 
         private SerializedProperty _moveSpeed;
@@ -26,6 +27,7 @@ namespace CameraControl.Editor
         {
             _this = target as CameraControl;
             _cameraMode = serializedObject.FindProperty("cameraMode");
+            _grayScaleAmount = serializedObject.FindProperty("grayScaleAmount");
             _moveSpeed = serializedObject.FindProperty("moveSpeed");
             _zoomInSpeed = serializedObject.FindProperty("zoomInSpeed");
             // _this.maxMovePosition = new Vector3(10, 10, 10);
@@ -35,8 +37,7 @@ namespace CameraControl.Editor
         public override void OnInspectorGUI()
         {
             EditorGUILayout.PropertyField(_cameraMode);
-            // _this.enableLinearInterpolation = EditorGUILayout.Toggle(
-            // _this.enableLinearInterpolation ? "Enabled Linear" : "Disabled Linear", _this.enableLinearInterpolation);
+            EditorGUILayout.PropertyField(_grayScaleAmount);
             _this.enableLinearInterpolation = EditorGUILayout.Foldout(_this.enableLinearInterpolation,
                 _this.enableLinearInterpolation ? "Enabled Linear Interpolation" : "Disabled Linear Interpolation");
             serializedObject.ApplyModifiedProperties();

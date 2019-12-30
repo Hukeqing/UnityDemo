@@ -15,10 +15,14 @@ namespace CameraControl
     public class CameraControl : MonoBehaviour
     {
         private Camera _camera;
+        private Material _material;
+        private Shader _curShader;
+        private static readonly int LuminosityAmount = Shader.PropertyToID("_LuminosityAmount");
 
         public CameraMode cameraMode;
         public bool enableLinearInterpolation;
         [Range(0, 1)] public float linearInterpolation;
+        [Range(0, 1)] public float grayScaleAmount = 1f;
 
         public Transform player;
 
@@ -32,7 +36,6 @@ namespace CameraControl
         public bool useClock;
         public Vector3 clockPosition2, clockPosition1;
 
-
         public int freeDimension;
         // TODO move up and down with plane
         // public float cameraDistance;
@@ -45,9 +48,12 @@ namespace CameraControl
             var thisTransform = transform;
             _prePosition = player.position - thisTransform.position;
             RotationAngle(player, thisTransform, out _preAngle, out _preNormal);
+
+            _curShader = Shader.Find("CameraGrey/CameraGreyShader");
+            _material = new Material(_curShader) {hideFlags = HideFlags.HideAndDontSave};
         }
 
-        private void FixedUpdate()
+        private void LateUpdate()
         {
             switch (cameraMode)
             {
@@ -154,5 +160,20 @@ namespace CameraControl
             };
             transform.position = newPosition;
         }
+        
+        private void OnRenderImage(RenderTexture sourceTexture, RenderTexture destTexture)
+        {
+            if (_curShader != null)
+            {
+                _material.SetFloat(LuminosityAmount, grayScaleAmount);
+
+                Graphics.Blit(sourceTexture, destTexture, _material);
+            }
+            else
+            {
+                Graphics.Blit(sourceTexture, destTexture);
+            }
+        }
+
     }
 }
