@@ -35,10 +35,12 @@ namespace CameraControl
         public float zoomInSpeed;
         public bool useClock;
         public Vector3 clockPosition2, clockPosition1;
-
         public int freeDimension;
-        // TODO move up and down with plane
-        // public float cameraDistance;
+        public bool enableFixedDistance;
+        public float cameraDistance;
+        public float cameraIgnoreDistance;
+        public float cameraMaxDistance;
+        public LayerMask cameraOnMask;
 
         private float _curMoveSpeed;
 
@@ -97,14 +99,28 @@ namespace CameraControl
                 new Vector3(
                     Input.mousePosition.x < mouseAllowRect.xMin ? -1 :
                     Input.mousePosition.x > mouseAllowRect.xMax ? 1 : 0,
+                    0,
                     Input.mousePosition.y < mouseAllowRect.yMin ? -1 :
-                    Input.mousePosition.y > mouseAllowRect.yMax ? 1 : 0,
-                    0);
+                    Input.mousePosition.y > mouseAllowRect.yMax ? 1 : 0);
             moveVector3.Normalize();
             _curMoveSpeed = Math.Abs(moveVector3.sqrMagnitude) > Mathf.Epsilon
                 ? NextValue(_curMoveSpeed, moveSpeed)
                 : NextValue(_curMoveSpeed, 0);
-            transform.Translate(Time.deltaTime * _curMoveSpeed * moveVector3);
+            transform.Translate(Time.deltaTime * _curMoveSpeed * moveVector3, Space.World);
+            if (enableFixedDistance)
+            {
+                var selfTransform = transform;
+                var ray = new Ray(selfTransform.position, selfTransform.forward);
+                if (Physics.Raycast(ray, out var hitInfo, cameraMaxDistance, cameraOnMask))
+                {
+                    if (Mathf.Abs(cameraDistance - hitInfo.distance) > cameraIgnoreDistance)
+                    {
+                        selfTransform.Translate(NextPosition(Vector3.zero,
+                            (hitInfo.distance - cameraDistance) * selfTransform.forward), Space.World);
+                    }
+                }
+            }
+
             if (useClock)
             {
                 PositionClock();
@@ -160,7 +176,7 @@ namespace CameraControl
             };
             transform.position = newPosition;
         }
-        
+
         private void OnRenderImage(RenderTexture sourceTexture, RenderTexture destTexture)
         {
             if (_curShader != null)
@@ -174,6 +190,5 @@ namespace CameraControl
                 Graphics.Blit(sourceTexture, destTexture);
             }
         }
-
     }
 }

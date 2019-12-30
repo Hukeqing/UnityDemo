@@ -17,6 +17,7 @@ namespace CameraControl.Editor
 
         private SerializedProperty _moveSpeed;
         private SerializedProperty _zoomInSpeed;
+        private SerializedProperty _cameraOnMask;
 
         private Object _player;
 
@@ -28,6 +29,7 @@ namespace CameraControl.Editor
             _this = target as CameraControl;
             _cameraMode = serializedObject.FindProperty("cameraMode");
             _grayScaleAmount = serializedObject.FindProperty("grayScaleAmount");
+            _cameraOnMask = serializedObject.FindProperty("cameraOnMask");
             _moveSpeed = serializedObject.FindProperty("moveSpeed");
             _zoomInSpeed = serializedObject.FindProperty("zoomInSpeed");
             // _this.maxMovePosition = new Vector3(10, 10, 10);
@@ -72,6 +74,30 @@ namespace CameraControl.Editor
                     EditorGUILayout.PropertyField(_moveSpeed);
                     EditorGUILayout.PropertyField(_zoomInSpeed);
                     serializedObject.ApplyModifiedProperties();
+                    _this.enableFixedDistance = EditorGUILayout.Foldout(_this.enableFixedDistance,
+                        _this.enableFixedDistance ? "Enabled Fixed Distance" : "Disabled Fixed Distance");
+                    if (_this.enableFixedDistance)
+                    {
+                        _this.cameraDistance = EditorGUILayout.FloatField("Fixed Distance", _this.cameraDistance);
+                        if (_this.cameraDistance < 0)
+                        {
+                            _this.cameraDistance = 0;
+                        }
+
+                        _this.cameraMaxDistance =
+                            EditorGUILayout.FloatField("Max Distance", _this.cameraMaxDistance);
+                        if (_this.cameraMaxDistance < _this.cameraDistance)
+                        {
+                            _this.cameraMaxDistance = _this.cameraDistance;
+                        }
+
+                        _this.cameraIgnoreDistance =
+                            EditorGUILayout.Slider("Ignore Distance", _this.cameraIgnoreDistance, 0f, 5f);
+
+                        EditorGUILayout.PropertyField(_cameraOnMask);
+                        serializedObject.ApplyModifiedProperties();
+                    }
+
                     _this.useClock = EditorGUILayout.Foldout(_this.useClock,
                         _this.useClock ? "Enabled Clock" : "Disabled Clock");
                     if (_this.useClock)
@@ -136,6 +162,7 @@ namespace CameraControl.Editor
 
                         EditorGUILayout.EndVertical();
                     }
+
                     break;
                 case 3:
                     break;
