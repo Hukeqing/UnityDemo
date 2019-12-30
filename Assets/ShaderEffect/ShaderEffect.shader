@@ -6,18 +6,17 @@
         _MainTex ("Texture", 2D) = "white" {}
         _ErrorTex ("Texture", 2D) = "white" {}
         _Show ("Show", Int) = 100
-        _Error ("Error", Int) = 100
+        _Error ("Error", Int) = 50
     }
     SubShader
     {
         Pass 
         {
-            Tags { "Queue"="AlphaTest" "IgnoreProjector"="True" "RenderType"="TransparentCutout" "LightMode"="ForwardBase" }
+            Tags { "Queue"="Transparent" "IgnoreProjector"="True" "RenderType"="TransparentCutout" "LightMode"="ForwardBase" }
 
             ZWrite Off
             // 开启混合模式，并设置混合因子为SrcAlpha和OneMinusSrcAlpha
             Blend SrcAlpha OneMinusSrcAlpha
-
             
             CGPROGRAM
             
@@ -64,10 +63,13 @@
             {
                 fixed4 col;
                 // sample the texture
-                if (i.vertex.y > _Error) {
+                if (i.vertex.y >= _Show + _Error) {
+                    //clip(-1);
                     col = fixed4(0, 0, 0, 0);
                 } else if (i.vertex.y > _Show) {
-                    col = tex2D(_ErrorTex, i.uv) * _Color;
+                    float ErrorValue = (_Error + _Show - i.vertex.y) / _Error;
+                    float Layer = 4 - floor(ErrorValue * 3);
+                    col = tex2D(_ErrorTex, (i.uv * Layer) % 1) * float4(_Color.xyz, ErrorValue);
                 } else {
                     col = tex2D(_MainTex, i.uv) * _Color;
                 }
