@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.Serialization;
 
@@ -12,37 +14,53 @@ namespace CameraControl
         OverLook
     }
 
+    [Serializable]
+    public struct Target
+    {
+        public Transform pos;
+        public bool important;
+
+        public Target(Transform p, bool i = false)
+        {
+            pos = p;
+            important = i;
+        }
+    }
+
     public class CameraControl : MonoBehaviour
     {
-        private Camera _camera;
-        private Material _material;
-        private Shader _curShader;
         private static readonly int LuminosityAmount = Shader.PropertyToID("_LuminosityAmount");
+        private Camera _camera;
 
-        public CameraMode cameraMode;
-        public bool enableLinearInterpolation;
-        [Range(0, 1)] public float linearInterpolation;
-        [Range(0, 1)] public float grayScaleAmount = 1f;
-
-        public Transform player;
-
-        private Vector3 _prePosition;
+        private float _curMoveSpeed;
+        private Shader _curShader;
+        private Material _material;
         private float _preAngle;
         private Vector3 _preNormal;
 
-        public float moveSpeed;
-        public Vector2 mouseRect;
-        public float zoomInSpeed;
-        public bool useClock;
-        public Vector3 clockPosition2, clockPosition1;
-        public int freeDimension;
-        public bool enableFixedDistance;
+        private Vector3 _prePosition;
         public float cameraDistance;
         public float cameraIgnoreDistance;
         public float cameraMaxDistance;
-        public LayerMask cameraOnMask;
 
-        private float _curMoveSpeed;
+        public CameraMode cameraMode;
+        public LayerMask cameraOnMask;
+        public Vector3 clockPosition2, clockPosition1;
+        public bool enableFixedDistance;
+        public bool enableLinearInterpolation;
+        public int freeDimension;
+        [Range(0, 1)] public float grayScaleAmount = 1f;
+        [Range(0, 1)] public float linearInterpolation;
+        [Range(1, 89)] public float maxFieldAngle;
+        public float minHeight;
+        public Vector2 mouseRect;
+
+        public float moveSpeed;
+
+        public Transform player;
+        public List<Target> targets;
+        public bool useClock;
+        public float zoomInSpeed;
 
         private void Start()
         {
@@ -53,6 +71,11 @@ namespace CameraControl
 
             _curShader = Shader.Find("CameraGrey/CameraGreyShader");
             _material = new Material(_curShader) {hideFlags = HideFlags.HideAndDontSave};
+
+            if (targets == null)
+            {
+                targets = new List<Target>();
+            }
         }
 
         private void LateUpdate()
@@ -69,6 +92,7 @@ namespace CameraControl
                     Mou();
                     break;
                 case CameraMode.OverLook:
+                    Ove();
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -128,6 +152,92 @@ namespace CameraControl
 
             _camera.orthographicSize -= zoomInSpeed * Input.mouseScrollDelta.y;
             _camera.fieldOfView -= zoomInSpeed * Input.mouseScrollDelta.y;
+        }
+
+        private void Ove()
+        {
+            if (targets.Count == 0)
+                return;
+            var center = new Vector3(0, 0, 0);
+            center = targets.Aggregate(center, (current, target) => current + target.pos.position);
+
+            center /= targets.Count;
+            switch (freeDimension)
+            {
+                case 0:
+                    break;
+                case 1:
+                {
+                    var flag = transform.position.x > center.x ? 1 : 0;
+                    var y = Mathf.NegativeInfinity;
+                    var tmp = center.x;
+                    var imp = false;
+                    foreach (var position in from target in targets where target.important select target.pos.position)
+                    {
+                        imp = true;
+                        center.x = position.x;
+                        y = Mathf.Max(y, Vector3.Distance(center, position) / Mathf.Tan(Mathf.Deg2Rad * maxFieldAngle));
+                    }
+
+                    if (imp)
+                    {
+                        center.x = tmp + flag * y;
+                    }
+                    else
+                    {
+                        center.x = transform.position.x;
+                    }
+                }
+                    break;
+                case 2:
+                {
+                    var flag = transform.position.y > center.y ? 1 : 0;
+                    var y = minHeight;
+                    var tmp = center.y;
+                    var imp = false;
+                    foreach (var position in from target in targets where target.important select target.pos.position)
+                    {
+                        imp = true;
+                        center.y = position.y;
+                        y = Mathf.Max(y, Vector3.Distance(center, position) / Mathf.Tan(Mathf.Deg2Rad * maxFieldAngle));
+                    }
+
+                    if (imp)
+                    {
+                        center.y = tmp + flag * y;
+                    }
+                    else
+                    {
+                        center.y = transform.position.y;
+                    }
+                }
+                    break;
+                case 3:
+                {
+                    var flag = transform.position.z > center.z ? 1 : 0;
+                    var y = minHeight;
+                    var tmp = center.z;
+                    var imp = false;
+                    foreach (var position in from target in targets where target.important select target.pos.position)
+                    {
+                        imp = true;
+                        center.z = position.z;
+                        y = Mathf.Max(y, Vector3.Distance(center, position) / Mathf.Tan(Mathf.Deg2Rad * maxFieldAngle));
+                    }
+
+                    if (imp)
+                    {
+                        center.z = tmp + flag * y;
+                    }
+                    else
+                    {
+                        center.z = transform.position.z;
+                    }
+                }
+                    break;
+            }
+
+            transform.position = NextPosition(transform.position, center);
         }
 
         private float NextValue(float curValue, float targetValue)

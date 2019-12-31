@@ -390,7 +390,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b64c278f9c35ffd4490e9ce0c3ee4c8c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cameraMode: 2
+  cameraMode: 3
   enableLinearInterpolation: 0
   linearInterpolation: 0
   grayScaleAmount: 0
@@ -398,16 +398,21 @@ MonoBehaviour:
   moveSpeed: 10
   mouseRect: {x: 10, y: 10}
   zoomInSpeed: 2
-  useClock: 0
-  clockPosition2: {x: 13.990875, y: 11.232916, z: 8.090204}
-  clockPosition1: {x: -18.699594, y: -3.360797, z: -32.840034}
+  useClock: 1
+  clockPosition2: {x: 13.990875, y: 0, z: 8.090204}
+  clockPosition1: {x: -18.699594, y: 36.493595, z: -32.840034}
   freeDimension: 0
   enableFixedDistance: 1
   cameraDistance: 10
-  cameraIgnoreDistance: 100
+  cameraIgnoreDistance: 5
+  cameraMaxDistance: 10
   cameraOnMask:
     serializedVersion: 2
     m_Bits: 4294967295
+  targets:
+  - pos: {fileID: 1028819678}
+    important: 1
+  maxFieldAngle: 0
 --- !u!1 &1323370912
 GameObject:
   m_ObjectHideFlags: 0

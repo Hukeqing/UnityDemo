@@ -9,20 +9,21 @@ namespace CameraControl.Editor
     [CustomEditor(typeof(CameraControl))]
     public class CameraEditor : UnityEditor.Editor
     {
-        private CameraControl _this;
-
         private SerializedProperty _cameraMode;
+        private SerializedProperty _cameraOnMask;
+        private Color _clockColor = Color.red;
+
+        private bool _clockSceneShow = true;
         private SerializedProperty _grayScaleAmount;
         private float _linearInterpolationValue;
 
         private SerializedProperty _moveSpeed;
-        private SerializedProperty _zoomInSpeed;
-        private SerializedProperty _cameraOnMask;
 
         private Object _player;
 
-        private bool _clockSceneShow = true;
-        private Color _clockColor = Color.red;
+        private SerializedProperty _targetList;
+        private CameraControl _this;
+        private SerializedProperty _zoomInSpeed;
 
         private void OnEnable()
         {
@@ -32,6 +33,7 @@ namespace CameraControl.Editor
             _cameraOnMask = serializedObject.FindProperty("cameraOnMask");
             _moveSpeed = serializedObject.FindProperty("moveSpeed");
             _zoomInSpeed = serializedObject.FindProperty("zoomInSpeed");
+            _targetList = serializedObject.FindProperty("targets");
             // _this.maxMovePosition = new Vector3(10, 10, 10);
             // _this.minMovePosition = new Vector3(-10, -10, -10);
         }
@@ -110,7 +112,7 @@ namespace CameraControl.Editor
                         }
 
                         _this.freeDimension = EditorGUILayout.Popup("Not Clock Dimension", _this.freeDimension,
-                            new string[] {"None", "x", "y", "z"});
+                            new[] {"None", "x", "y", "z"});
                         EditorGUILayout.BeginVertical();
                         if (_this.freeDimension != 1)
                         {
@@ -165,6 +167,12 @@ namespace CameraControl.Editor
 
                     break;
                 case 3:
+                    _this.freeDimension = EditorGUILayout.Popup("Free Dimension", _this.freeDimension,
+                        new[] {"None", "x", "y", "z"});
+                    EditorGUILayout.PropertyField(_targetList, true);
+                    _this.maxFieldAngle = EditorGUILayout.Slider("Max Important Angle", _this.maxFieldAngle, 1, 89);
+                    _this.minHeight = EditorGUILayout.FloatField("Min Height", _this.minHeight);
+                    serializedObject.ApplyModifiedProperties();
                     break;
             }
         }
